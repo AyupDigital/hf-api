@@ -1,0 +1,22 @@
+name: Docker Image CI
+
+on:
+  pull_request:
+    branches: [ "develop" ]
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Login to Docker
+      run: echo ${DOCKER_PWD} | docker login --username ${DOCKER_USER} --password-stdin
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PWD: ${{secrets.DOCKER_PWD}}
+    - name: Build the Docker image
+      run: ./devlop build
