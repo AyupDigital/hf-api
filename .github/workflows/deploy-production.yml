@@ -13,32 +13,32 @@ env:
   ECR_REPOSITORY: ${{vars.REPO_URI_PRODUCTION}}
   CLUSTER: ${{vars.CLUSTER_PRODUCTION}}
 
-
 jobs:
   deploy:
     runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v4
-        with: sparse-checkout: |
-          app
-          bootstrap
-          config
-          database
-          docker
-          elastic
-          lang
-          public
-          resources
-          routes
-          storage
-          artisan
-          composer.json
-          composer.lock
-          develop
-          package.json
-          package-lock.json
-          webpack.mix.js
+        with:
+          sparse-checkout: |
+            app
+            bootstrap
+            config
+            database
+            docker
+            elastic
+            lang
+            public
+            resources
+            routes
+            storage
+            artisan
+            composer.json
+            composer.lock
+            develop
+            package.json
+            package-lock.json
+            webpack.mix.js
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -78,8 +78,7 @@ jobs:
           env:
             ENV_SECRET_ID: .env.api.${{env.ENVIRONMENT}}
           shell: bash
-          run:
-            echo "$ENV_FILE" >> .env
+          run: echo "$ENV_FILE" >> .env
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
