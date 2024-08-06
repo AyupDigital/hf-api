@@ -74,11 +74,15 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
-            ENV_FILE, ${{env.ENV_SECRET_ID}}
+            ENV_SECRET, ${{env.ENV_SECRET_ID}}
         env:
           ENV_SECRET_ID: .env.api.${{env.ENVIRONMENT}}
+
+      - name: Store secret value to .env
+        env:
+          ENV_SECRET: ${{env.ENV_SECRET}}
         shell: bash
-        run: echo "$ENV_FILE" | jq '.SecretString' >> .env
+        run: echo "$ENV_SECRET" | jq '.SecretString' >> .env
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
