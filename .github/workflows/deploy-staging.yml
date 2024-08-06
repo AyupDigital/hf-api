@@ -75,8 +75,8 @@ jobs:
             ENV_FILE, ${{env.ENV_SECRET_ID}}
         env:
           ENV_SECRET_ID: .env.api.${{env.ENVIRONMENT}}
-          shell: bash
-          run: echo "$ENV_FILE" | jq '.SecretString' >> .env
+        shell: bash
+        run: echo "$ENV_FILE" | jq '.SecretString' >> .env
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
