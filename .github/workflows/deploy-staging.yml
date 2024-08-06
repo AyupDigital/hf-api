@@ -44,10 +44,10 @@ jobs:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
-          env:
-            AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID_STAGING}}
-            AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY_STAGING}}
-            AWS_DEFAULT_REGION: ${{vars.AWS_DEFAULT_REGION_STAGING}}
+        env:
+          AWS_ACCESS_KEY_ID: ${{vars.AWS_ACCESS_KEY_ID_STAGING}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY_STAGING}}
+          AWS_DEFAULT_REGION: ${{vars.AWS_DEFAULT_REGION_STAGING}}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -73,10 +73,10 @@ jobs:
         with:
           secret-ids: |
             ENV_FILE, ${{env.ENV_SECRET_ID}}
-          env:
-            ENV_SECRET_ID: .env.api.${{env.ENVIRONMENT}}
-          shell: bash
-          run: echo "$ENV_FILE" | jq '.SecretString' >> .env
+        env:
+          ENV_SECRET_ID: .env.api.${{env.ENVIRONMENT}}
+        shell: bash
+        run: echo "$ENV_FILE" | jq '.SecretString' >> .env
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
