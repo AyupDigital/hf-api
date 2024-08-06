@@ -68,7 +68,7 @@ jobs:
           ./develop npm run prod
           rm -rf node_modules
 
-      - name: Download the secret
+      - name: Download the secret to .env
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
@@ -77,7 +77,7 @@ jobs:
             ENV_SECRET_ID: .env.api.${{env.ENVIRONMENT}}
           shell: bash
           run:
-            echo "$ENV_FILE" >> .env
+            echo "$ENV_FILE" | jq '.SecretString' >> .env
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
