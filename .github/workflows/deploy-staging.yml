@@ -73,11 +73,7 @@ jobs:
         run: docker run --rm --volume $PWD:/var/www/html -e COMPOSER_MEMORY_LIMIT=-1 $ECR_REGISTRY/$ECR_REPOSITORY:latest composer install --no-dev --optimize-autoloader
 
       - name: Install NPM dependencies
-        run: |
-          nvm use 16.20
-          npm ci
-          npm run prod
-          rm -rf node_modules
+        run: docker run --rm --volume $PWD:/var/www/html  -w /var/www/html node:16.20 npm ci && npm run prod && rm -rf node_modules
 
       - name: Copy completed app to packaged ready for final build
         shell: bash
