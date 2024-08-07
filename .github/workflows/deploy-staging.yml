@@ -52,7 +52,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Login to Docker
         run: echo ${DOCKER_PWD} | docker login --username ${DOCKER_USER} --password-stdin
@@ -60,8 +60,17 @@ jobs:
           DOCKER_USER: ${{secrets.DOCKER_USER}}
           DOCKER_PWD: ${{secrets.DOCKER_PWD}}
 
+      - name: Build initial image to use to install composer dependencies
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{env.ECR_REPOSITORY}}
+        run: docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest docker/app/
+
       - name: Install composer dependencies
-        run: docker run --rm --volume $PWD:/app -e COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --optimize-autoloader
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{env.ECR_REPOSITORY}}
+        run: docker run --rm --volume $PWD:/var/www/html -e COMPOSER_MEMORY_LIMIT=-1 $ECR_REGISTRY/$ECR_REPOSITORY:latest install --no-dev --optimize-autoloader
 
       - name: Install NPM dependencies
         run: |
@@ -70,7 +79,7 @@ jobs:
           npm run prod
           rm -rf node_modules
 
-      - name: Prepare app for building an image
+      - name: Copy completed app to packaged ready for final build
         shell: bash
         run: cp -p -R !(docker) docker/app/packaged/
 
@@ -94,14 +103,14 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+          ECR_REPOSITORY: ${{env.ECR_REPOSITORY}
         run: |
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest docker/app/
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
       - name: Force new AWS ECS deployment
         run: |
