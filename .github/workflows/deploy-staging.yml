@@ -39,6 +39,17 @@ jobs:
             package-lock.json
             webpack.mix.js
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16.20
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          tools: composer:v2
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -60,20 +71,14 @@ jobs:
           DOCKER_USER: ${{secrets.DOCKER_USER}}
           DOCKER_PWD: ${{secrets.DOCKER_PWD}}
 
-      - name: Build initial image to use to install composer dependencies
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{env.ECR_REPOSITORY}}
-        run: docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest docker/app/
-
       - name: Install composer dependencies
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{env.ECR_REPOSITORY}}
-        run: docker run --rm --volume $PWD:/var/www/html -e COMPOSER_MEMORY_LIMIT=-1 $ECR_REGISTRY/$ECR_REPOSITORY:latest composer install --no-dev --optimize-autoloader
+        run: composer install --no-dev --optimize-autoloader --no-interaction
 
       - name: Install NPM dependencies
-        run: docker run --rm --volume $PWD:/var/www/html  -w /var/www/html node:16.20 npm ci && npm run prod && rm -rf node_modules
+        run: |
+          npm ci
+          npm run prod
+          rm -rf node_modules
 
       - name: Copy completed app to packaged ready for final build
         shell: bash
