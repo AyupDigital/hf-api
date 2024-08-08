@@ -95,12 +95,8 @@ jobs:
       - name: Store secret value to .env
         env:
           ENV_SECRET: ${{env.ENV_SECRET}}
-          ENV_SECRET_ID: .env.api.${{env.ENVIRONMENT}}
         shell: bash
-        run: |
-          echo "AWS Secret $ENV_SECRET_ID"
-          echo "$ENV_SECRET" | sed 's/./& /g'
-          echo "$ENV_SECRET" | jq -r '.SecretString' >> docker/app/packaged/.env
+        run: echo "$ENV_SECRET" >> docker/app/packaged/.env
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
