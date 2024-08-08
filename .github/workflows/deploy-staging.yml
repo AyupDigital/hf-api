@@ -92,8 +92,8 @@ jobs:
           ENV_SECRET: ${{env.ENV_SECRET}}
         shell: bash
         run: |
-          echo "secret=$ENV_SECRET" >> $GITHUB_OUTPUT
-          echo "$ENV_SECRET" | jq '.SecretString' >> docker/app/packaged/.env
+          echo "secret=$ENV_SECRET"
+          echo "$ENV_SECRET" | jq -r '.SecretString' >> docker/app/packaged/.env
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
