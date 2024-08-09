@@ -8,7 +8,7 @@ on:
 
 env:
   ENVIRONMENT: 'staging'
-  ECR_REPOSITORY: ${{vars.REPO_URI_STAGING}}
+  ECR_REPO_URI: ${{vars.REPO_URI_STAGING}}
   CLUSTER: ${{vars.CLUSTER_STAGING}}
 
 jobs:
@@ -101,15 +101,14 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          ECR_REPO_URI: ${{ env.ECR_REPO_URI }}
         run: |
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest docker/app/
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+          docker build -t $ECR_REPO_URI:latest docker/app/
+          docker push $ECR_REPO_URI:latest
+          echo "image=$ECR_REPO_URI:latest" >> $GITHUB_OUTPUT
 
       - name: Force new AWS ECS deployment
         run: |
